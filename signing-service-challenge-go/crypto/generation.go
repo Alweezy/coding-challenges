@@ -7,7 +7,7 @@ import (
 	"crypto/rsa"
 )
 
-// RSAGenerator generates a RSA key pair.
+// RSAGenerator generates an RSA key pair.
 type RSAGenerator struct{}
 
 // Generate generates a new RSAKeyPair.

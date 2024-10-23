@@ -2,6 +2,8 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/infrastructure"
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/service"
 	"net/http"
 )
 
@@ -17,14 +19,25 @@ type ErrorResponse struct {
 
 // Server manages HTTP requests and dispatches them to the appropriate services.
 type Server struct {
-	listenAddress string
+	listenAddress      string
+	DeviceService      *service.DeviceService
+	TransactionService *service.TransactionService
+	DeviceRepository   infrastructure.DeviceRepository
 }
 
 // NewServer is a factory to instantiate a new Server.
-func NewServer(listenAddress string) *Server {
+func NewServer(
+	listenAddress string,
+	deviceRepository infrastructure.DeviceRepository,
+	deviceService *service.DeviceService,
+	transactionService *service.TransactionService,
+) *Server {
 	return &Server{
 		listenAddress: listenAddress,
 		// TODO: add services / further dependencies here ...
+		DeviceRepository:   deviceRepository,
+		DeviceService:      deviceService,
+		TransactionService: transactionService,
 	}
 }
 
@@ -35,6 +48,10 @@ func (s *Server) Run() error {
 	mux.Handle("/api/v0/health", http.HandlerFunc(s.Health))
 
 	// TODO: register further HandlerFuncs here ...
+	mux.Handle("/api/v0/devices", http.HandlerFunc(s.CreateSignatureDevice))
+	mux.Handle("/api/v0/devices/list", http.HandlerFunc(s.ListDevices))
+	mux.Handle("/api/v0/devices/{deviceId}", http.HandlerFunc(s.GetDeviceById))
+	mux.Handle("/api/v0/transactions/{deviceId}/sign", http.HandlerFunc(s.SignTransaction))
 
 	return http.ListenAndServe(s.listenAddress, mux)
 }
@@ -57,6 +74,7 @@ func WriteErrorResponse(w http.ResponseWriter, code int, errors []string) {
 	bytes, err := json.Marshal(errorResponse)
 	if err != nil {
 		WriteInternalError(w)
+		return
 	}
 
 	w.Write(bytes)
@@ -74,6 +92,7 @@ func WriteAPIResponse(w http.ResponseWriter, code int, data interface{}) {
 	bytes, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
 		WriteInternalError(w)
+		return
 	}
 
 	w.Write(bytes)
