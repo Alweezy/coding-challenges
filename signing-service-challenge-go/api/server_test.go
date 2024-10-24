@@ -93,13 +93,10 @@ func TestCreateSignatureDeviceSuccess(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			// Arrange: Setup a fresh server instance
 			s := setupServer()
 
-			// Act: Create the signature device
 			deviceId := createSignatureDeviceWithServer(t, s, tc.algorithm, tc.label, tc.expectedStatus)
 
-			// Assert: Ensure the device is actually stored
 			_, exists := s.DeviceRepository.GetDeviceById(deviceId)
 			if !exists {
 				t.Fatalf("Expected device with ID %s to be stored", deviceId)
@@ -276,7 +273,7 @@ func TestConcurrentTransactionSigning(t *testing.T) {
 		}(i)
 	}
 
-	wg.Wait() // Wait for all goroutines to complete
+	wg.Wait()
 }
 func TestGetDeviceById(t *testing.T) {
 	s := setupServer()

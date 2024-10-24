@@ -37,8 +37,8 @@ func verifyECCSignature(pub *ecdsa.PublicKey, data, signature []byte) bool {
 
 // TestRSA_Signer tests RSA signing functionality.
 func TestRSA_Signer(t *testing.T) {
-	// Arrange
-	rsaKey, err := rsa.GenerateKey(rand.Reader, 512) // Small key size for testing
+
+	rsaKey, err := rsa.GenerateKey(rand.Reader, 512)
 	if err != nil {
 		t.Fatalf("Failed to generate RSA key: %v", err)
 	}
@@ -60,7 +60,6 @@ func TestRSA_Signer(t *testing.T) {
 
 // TestECC_Signer tests ECC signing functionality.
 func TestECC_Signer(t *testing.T) {
-	// Arrange
 	eccKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatalf("Failed to generate ECC key: %v", err)
@@ -69,13 +68,11 @@ func TestECC_Signer(t *testing.T) {
 
 	signer := &cryptoLib.ECCSigner{PrivateKey: eccKey}
 
-	// Act
 	signature, err := signer.Sign(data)
 	if err != nil {
 		t.Fatalf("Failed to sign data: %v", err)
 	}
 
-	// Assert
 	if !verifyECCSignature(&eccKey.PublicKey, data, signature) {
 		t.Fatalf("ECC signature verification failed")
 	}
@@ -83,19 +80,16 @@ func TestECC_Signer(t *testing.T) {
 
 // TestGetSigner_RSA tests the GetSigner function for RSA keys.
 func TestGetSigner_RSA(t *testing.T) {
-	// Arrange
 	rsaKey, err := rsa.GenerateKey(rand.Reader, 512)
 	if err != nil {
 		t.Fatalf("Failed to generate RSA key: %v", err)
 	}
 
-	// Act
 	signer, err := cryptoLib.GetSigner(rsaKey)
 	if err != nil {
 		t.Fatalf("Failed to get RSA signer: %v", err)
 	}
 
-	// Assert
 	if _, ok := signer.(*cryptoLib.RSASigner); !ok {
 		t.Fatalf("Expected RSASigner, got %T", signer)
 	}
@@ -103,19 +97,16 @@ func TestGetSigner_RSA(t *testing.T) {
 
 // TestGetSigner_ECC tests the GetSigner function for ECC keys.
 func TestGetSigner_ECC(t *testing.T) {
-	// Arrange
 	eccKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		t.Fatalf("Failed to generate ECC key: %v", err)
 	}
 
-	// Act
 	signer, err := cryptoLib.GetSigner(eccKey)
 	if err != nil {
 		t.Fatalf("Failed to get ECC signer: %v", err)
 	}
 
-	// Assert
 	if _, ok := signer.(*cryptoLib.ECCSigner); !ok {
 		t.Fatalf("Expected ECCSigner, got %T", signer)
 	}
@@ -123,13 +114,10 @@ func TestGetSigner_ECC(t *testing.T) {
 
 // TestGetSigner_UnsupportedKey tests the GetSigner function for unsupported key types.
 func TestGetSigner_UnsupportedKey(t *testing.T) {
-	// Arrange
-	unsupportedKey := &x509.Certificate{} // Invalid key type
+	unsupportedKey := &x509.Certificate{}
 
-	// Act
 	signer, err := cryptoLib.GetSigner(unsupportedKey)
 
-	// Assert
 	if signer != nil {
 		t.Fatalf("Expected nil signer for unsupported key, got %T", signer)
 	}
